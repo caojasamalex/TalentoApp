@@ -1,0 +1,56 @@
+services:
+  db:
+    image: postgres:16
+    container_name: postgres_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  userservice:
+    build:
+      context: ./UserService
+      dockerfile: Dockerfile
+    container_name: userservice-talentoapp
+    restart: unless-stopped
+    ports:
+      - "8070:8070"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: ${USER_SVC_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      HMACSHA256_KEY: ${HMACSHA256_KEY}
+
+  companyrequestservice:
+    build:
+      context: ./CompanyRequestService
+      dockerfile: Dockerfile
+    container_name: companyrequestservice-talentoapp
+    restart: unless-stopped
+    ports:
+      - "8060:8060"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: ${CR_SVC_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      USER_SERVICE_URL: ${USER_SERVICE_URL}
+      COMPANY_SERVICE_URL: ${COMPANY_SERVICE_URL}
+
+volumes:
+  pgdata:

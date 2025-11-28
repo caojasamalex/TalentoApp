@@ -1,12 +1,12 @@
 package com.djokic.userservice.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-@AllArgsConstructor
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class RegisterRequestDTO {
     private String email;
     private String password;

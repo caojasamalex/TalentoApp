@@ -1,4 +1,4 @@
-package com.djokic.userservice.entity;
+package com.djokic.userservice.model;
 
 import com.djokic.userservice.enumeration.PlatformRole;
 import jakarta.persistence.*;
@@ -33,6 +33,6 @@ public class User {
     private String lastName;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "platform_role", nullable = false)
     private PlatformRole platformRole;
 }

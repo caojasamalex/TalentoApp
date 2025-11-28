@@ -8,6 +8,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class ChangeRoleRequest {
+public class ChangeRoleRequestDTO {
     PlatformRole role;
 }

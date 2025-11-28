@@ -1,7 +1,7 @@
 package com.djokic.userservice.mapper.impl;
 
 import com.djokic.userservice.dto.UserDTO;
-import com.djokic.userservice.entity.User;
+import com.djokic.userservice.model.User;
 import com.djokic.userservice.mapper.UserMapper;
 import org.springframework.stereotype.Component;
 

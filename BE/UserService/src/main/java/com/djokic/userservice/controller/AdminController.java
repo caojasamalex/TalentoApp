@@ -1,6 +1,6 @@
 package com.djokic.userservice.controller;
 
-import com.djokic.userservice.dto.ChangeRoleRequest;
+import com.djokic.userservice.dto.ChangeRoleRequestDTO;
 import com.djokic.userservice.dto.RegisterRequestDTO;
 import com.djokic.userservice.dto.UserDTO;
 import com.djokic.userservice.service.UserService;
@@ -25,8 +25,8 @@ public class AdminController {
     @PatchMapping("/user/{id}/role")
     public ResponseEntity<?> changeUserRole(
             @PathVariable("id") Long userId,
-            @RequestBody ChangeRoleRequest changeRoleRequest
+            @RequestBody ChangeRoleRequestDTO changeRoleRequestDTO
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.changeRole(userId, changeRoleRequest));
+        return ResponseEntity.status(HttpStatus.OK).body(userService.changeRole(userId, changeRoleRequestDTO));
     }
 }

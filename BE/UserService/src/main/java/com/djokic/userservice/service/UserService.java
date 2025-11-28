@@ -1,10 +1,10 @@
 package com.djokic.userservice.service;
 
-import com.djokic.userservice.dto.ChangeRoleRequest;
+import com.djokic.userservice.dto.ChangeRoleRequestDTO;
 import com.djokic.userservice.dto.LoginRequestDTO;
 import com.djokic.userservice.dto.RegisterRequestDTO;
 import com.djokic.userservice.dto.UserDTO;
-import com.djokic.userservice.entity.User;
+import com.djokic.userservice.model.User;
 import com.djokic.userservice.enumeration.PlatformRole;
 import com.djokic.userservice.mapper.UserMapper;
 import com.djokic.userservice.repository.UserRepository;
@@ -67,6 +67,18 @@ public class UserService {
                 .build();
 
         return userMapper.userToUserDTO(userRepository.save(userToCreate));
+    }
+
+    public UserDTO getUserById(Long id) {
+        if(id <= 0){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid ID");
+        }
+
+        UserDTO userDTO = userRepository.findUserById(id)
+                .map(userMapper::userToUserDTO)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with such ID doesn't exist"));
+
+        return userDTO;
     }
 
     public List<UserDTO> getAllUsers() {
@@ -168,14 +180,14 @@ public class UserService {
         // TODO: Validate that last name doesn't contain special characters
     }
 
-    public UserDTO changeRole(Long userId, ChangeRoleRequest changeRoleRequest) {
+    public UserDTO changeRole(Long userId, ChangeRoleRequestDTO changeRoleRequestDTO) {
         if(userId == null || userId <= 0){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User id must be greater than zero!");
         }
 
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        user.setPlatformRole(changeRoleRequest.getRole());
+        user.setPlatformRole(changeRoleRequestDTO.getRole());
 
         return userMapper.userToUserDTO(userRepository.save(user));
     }
