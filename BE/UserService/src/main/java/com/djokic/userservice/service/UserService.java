@@ -115,7 +115,7 @@ public class UserService {
         // Validate password - is null ? is blank ? minimum of 8 characters ? a special character, a number and a capitalized letter present ?
         validateEmail(loginRequestDTO.getEmail());
 
-        if(loginRequestDTO.getPassword() == null || loginRequestDTO.getPassword().trim().isEmpty()){
+        if(loginRequestDTO.getPassword() == null || loginRequestDTO.getPassword().trim().isBlank()){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password cannot be empty");
         }
 
