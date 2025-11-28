@@ -24,9 +24,10 @@ public class AdminController {
 
     @PatchMapping("/user/{id}/role")
     public ResponseEntity<?> changeUserRole(
+            @RequestHeader("X-User-Id") Long currentUserId,
             @PathVariable("id") Long userId,
             @RequestBody ChangeRoleRequestDTO changeRoleRequestDTO
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.changeRole(userId, changeRoleRequestDTO));
+        return ResponseEntity.status(HttpStatus.OK).body(userService.changeRole(currentUserId, userId, changeRoleRequestDTO));
     }
 }

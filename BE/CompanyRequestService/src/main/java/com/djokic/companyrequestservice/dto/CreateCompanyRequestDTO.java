@@ -1,6 +1,5 @@
 package com.djokic.companyrequestservice.dto;
 
-import com.djokic.companyrequestservice.enumeration.CompanyRequestStatus;
 import lombok.*;
 
 @Getter

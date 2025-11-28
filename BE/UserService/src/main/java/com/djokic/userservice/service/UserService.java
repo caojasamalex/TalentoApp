@@ -180,12 +180,40 @@ public class UserService {
         // TODO: Validate that last name doesn't contain special characters
     }
 
-    public UserDTO changeRole(Long userId, ChangeRoleRequestDTO changeRoleRequestDTO) {
+    @Transactional
+    public UserDTO changeRole(Long currentUserId, Long userId, ChangeRoleRequestDTO changeRoleRequestDTO) {
+        if(currentUserId == null || currentUserId <= 0){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid CurrentUserID");
+        }
+
+        User currentUser = userRepository.findUserById(currentUserId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with such ID doesn't exist"));
+
+        if(currentUser.getPlatformRole() != PlatformRole.PLATFORM_ADMIN){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not an admin!");
+        }
+
         if(userId == null || userId <= 0){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User id must be greater than zero!");
         }
 
+        if(currentUserId.equals(userId)){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot change your own role!");
+        }
+
+        if(changeRoleRequestDTO == null){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ChangeRoleRequestDTO is required!");
+        }
+
+        if (changeRoleRequestDTO.getRole() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Role is required!");
+        }
+
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        if(user.getPlatformRole() == changeRoleRequestDTO.getRole()){
+            return userMapper.userToUserDTO(user);
+        }
 
         user.setPlatformRole(changeRoleRequestDTO.getRole());
 

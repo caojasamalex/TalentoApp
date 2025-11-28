@@ -29,16 +29,20 @@ public class CompanyRequestService {
     private final UserServiceClient userServiceClient;
     private final CompanyServiceClient companyServiceClient;
 
-    public List<CompanyRequestDTO> findAllCompanyRequests() {
+    public List<CompanyRequestDTO> findAllCompanyRequests(Long currentUserId) {
+        validateIfUserIsAdmin(currentUserId);
+
         return companyRequestRepository.findAll()
                 .stream()
                 .map(companyRequestMapper::companyRequestToCompanyRequestDTO)
                 .collect(Collectors.toList());
     }
 
-    public CompanyRequestDTO findCompanyRequestById(Long id) {
-        return companyRequestMapper.companyRequestToCompanyRequestDTO(companyRequestRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Company Request with ID %d not found", id))));
+    public CompanyRequestDTO findCompanyRequestById(Long currentUserId, Long companyRequestId) {
+        validateIfUserIsAdmin(currentUserId);
+
+        return companyRequestMapper.companyRequestToCompanyRequestDTO(companyRequestRepository.findById(companyRequestId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Company Request with ID %d not found", companyRequestId))));
     }
 
     @Transactional
@@ -68,8 +72,6 @@ public class CompanyRequestService {
         if (dto.getCompanyCity() == null || dto.getCompanyCity().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company City is required");
         }
-
-        UserDTO userDTO = userServiceClient.getUserById(requestedByUserId); // Feign will throw exception if null
 
         CompanyRequest companyRequest = CompanyRequest.builder()
                 .requestedByUserId(requestedByUserId)
@@ -107,8 +109,6 @@ public class CompanyRequestService {
         if(!companyRequestId.equals(companyRequestDTO.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "CompanyRequestIDs differ");
         }
-
-        UserDTO userDTO = userServiceClient.getUserById(currentUserId); // Feign will throw exception if null
 
         CompanyRequest saved = companyRequestRepository.findById(companyRequestId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Company Request with ID " + companyRequestId + " not found")
@@ -151,11 +151,7 @@ public class CompanyRequestService {
 
     @Transactional
     public CompanyRequestDTO approveCompanyRequest(Long currentUserId, Long companyRequestId) {
-        if(currentUserId == null || currentUserId <= 0L) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid CurrentUserId");
-        }
-
-        CompanyRequest companyRequest = fetchCompanyRequestAndValidateCurrentUserRoles(currentUserId, companyRequestId);
+        CompanyRequest companyRequest = validateAdminAndGetCompanyRequest(currentUserId, companyRequestId);
 
         companyRequest.setStatus(CompanyRequestStatus.APPROVED);
         companyRequest.setUpdatedAt(LocalDateTime.now());
@@ -167,11 +163,7 @@ public class CompanyRequestService {
 
     @Transactional
     public CompanyRequestDTO rejectCompanyRequest(Long currentUserId, Long companyRequestId) {
-        if(currentUserId == null || currentUserId <= 0L) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid CurrentUserId");
-        }
-
-        CompanyRequest companyRequest = fetchCompanyRequestAndValidateCurrentUserRoles(currentUserId, companyRequestId);
+        CompanyRequest companyRequest = validateAdminAndGetCompanyRequest(currentUserId, companyRequestId);
 
         companyRequest.setStatus(CompanyRequestStatus.REJECTED);
         companyRequest.setUpdatedAt(LocalDateTime.now());
@@ -179,22 +171,29 @@ public class CompanyRequestService {
         return companyRequestMapper.companyRequestToCompanyRequestDTO(companyRequestRepository.save(companyRequest));
     }
 
-    private CompanyRequest fetchCompanyRequestAndValidateCurrentUserRoles(Long currentUserId, Long companyRequestId) {
+    private CompanyRequest validateAdminAndGetCompanyRequest(Long currentUserId, Long companyRequestId) {
+        validateIfUserIsAdmin(currentUserId);
+
         CompanyRequest companyRequest = companyRequestRepository.findById(companyRequestId)
                 .orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Company Request Not Found")
                 );
-
-        UserDTO userDTO = userServiceClient.getUserById(currentUserId); // Feign will throw exception if null
-
-        if(userDTO.getPlatformRole() != PlatformRole.PLATFORM_ADMIN){
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admin platform roles are allowed to approve or reject company requests!");
-        }
 
         if(companyRequest.getStatus() != CompanyRequestStatus.PENDING){
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Company Request Status has already been processed");
         }
 
         return companyRequest;
+    }
+
+    private void validateIfUserIsAdmin(Long userId) {
+        if(userId == null || userId <= 0L) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid CurrentUserId");
+        }
+
+        UserDTO userDTO = userServiceClient.getUserById(userId);
+        if(userDTO.getPlatformRole() != PlatformRole.PLATFORM_ADMIN){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized!");
+        }
     }
 }
