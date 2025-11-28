@@ -1,10 +1,11 @@
 package com.djokic.companyrequestservice.mapper.impl;
 
 import com.djokic.companyrequestservice.dto.CompanyRequestDTO;
-import com.djokic.companyrequestservice.enumeration.CompanyRequestStatus;
 import com.djokic.companyrequestservice.mapper.CompanyRequestMapper;
 import com.djokic.companyrequestservice.model.CompanyRequest;
+import org.springframework.stereotype.Component;
 
+@Component
 public class CompanyRequestMapperImpl implements CompanyRequestMapper {
     @Override
     public CompanyRequestDTO companyRequestToCompanyRequestDTO(CompanyRequest companyRequest) {
@@ -17,6 +18,8 @@ public class CompanyRequestMapperImpl implements CompanyRequestMapper {
                 .companyCity(companyRequest.getCompanyCity())
                 .companyWebsite(companyRequest.getCompanyWebsite())
                 .status(companyRequest.getStatus())
+                .createdAt(companyRequest.getCreatedAt())
+                .updatedAt(companyRequest.getUpdatedAt())
                 .build();
     }
 
@@ -31,6 +34,8 @@ public class CompanyRequestMapperImpl implements CompanyRequestMapper {
                 .companyCity(companyRequestDTO.getCompanyCity())
                 .companyWebsite(companyRequestDTO.getCompanyWebsite())
                 .status(companyRequestDTO.getStatus())
+                .createdAt(companyRequestDTO.getCreatedAt())
+                .updatedAt(companyRequestDTO.getUpdatedAt())
                 .build();
     }
 }

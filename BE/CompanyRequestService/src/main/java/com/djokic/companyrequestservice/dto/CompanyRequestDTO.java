@@ -3,6 +3,8 @@ package com.djokic.companyrequestservice.dto;
 import com.djokic.companyrequestservice.enumeration.CompanyRequestStatus;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -16,4 +18,6 @@ public class CompanyRequestDTO {
     private String companyCity;
     private String companyWebsite;
     private CompanyRequestStatus status;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

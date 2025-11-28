@@ -4,6 +4,8 @@ import com.djokic.companyrequestservice.enumeration.CompanyRequestStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "company_requests")
 @Data
@@ -35,4 +37,10 @@ public class CompanyRequest {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private CompanyRequestStatus status;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 }

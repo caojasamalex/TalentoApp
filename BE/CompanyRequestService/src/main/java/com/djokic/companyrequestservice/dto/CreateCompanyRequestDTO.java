@@ -14,5 +14,4 @@ public class CreateCompanyRequestDTO {
     private String companyAddress;
     private String companyCity;
     private String companyWebsite;
-    private CompanyRequestStatus status;
 }
