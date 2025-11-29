@@ -68,7 +68,7 @@ public class CompanyService {
             );
         }
 
-        CompanyRequestDTO companyRequestDTO = companyRequestServiceClient.findCompanyRequestById(companyRequestId);
+        CompanyRequestDTO companyRequestDTO = companyRequestServiceClient.findCompanyRequestById(currentUserId, companyRequestId);
         if(companyRequestDTO == null) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,

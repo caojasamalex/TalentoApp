@@ -130,7 +130,7 @@ public class CompanyRequestService {
     }
 
     @Transactional
-    public CompanyRequestDTO approveCompanyRequest(Long currentUserId, Long companyRequestId) {
+    public CompanyRequestDTO approveCompanyRequestInternal(Long currentUserId, Long companyRequestId) {
         validateIfUserIsAdmin(currentUserId);
 
         CompanyRequest companyRequest = companyRequestRepository
@@ -152,11 +152,14 @@ public class CompanyRequestService {
         companyRequest.setStatus(CompanyRequestStatus.APPROVED);
         companyRequest.setUpdatedAt(LocalDateTime.now());
 
-        // TODO: CALL COMPANY SERVICE TO CREATE A NEW COMPANY
-        // companyServiceClient.createCompany(companyRequestMapper.companyRequestToCompanyRequestDTO(companyRequest));
-        //
-
         return companyRequestMapper.companyRequestToCompanyRequestDTO(companyRequestRepository.save(companyRequest));
+    }
+
+    public CompanyRequestDTO approveCompanyRequest(Long currentUserId, Long companyRequestId) {
+        CompanyRequestDTO companyRequestDTO = approveCompanyRequestInternal(currentUserId, companyRequestId);
+        companyServiceClient.createCompany(currentUserId, companyRequestId);
+
+        return companyRequestDTO;
     }
 
     @Transactional
