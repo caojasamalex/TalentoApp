@@ -64,11 +64,14 @@ public class CompanyRequestService {
                 .companyName(normalizeCompanyName(createCompanyRequestDTO.getCompanyName()))
                 .companyAddress(normalizeCompanyAddress(createCompanyRequestDTO.getCompanyAddress()))
                 .companyCity(normalizeCompanyCity(createCompanyRequestDTO.getCompanyCity()))
-                .companyWebsite(normalizeCompanyWebsite(createCompanyRequestDTO.getCompanyWebsite()))
                 .status(CompanyRequestStatus.PENDING)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
+
+        if(createCompanyRequestDTO.getCompanyWebsite() != null) {
+            companyRequest.setCompanyWebsite(createCompanyRequestDTO.getCompanyWebsite());
+        }
 
         return companyRequestMapper.companyRequestToCompanyRequestDTO(
                 companyRequestRepository.save(companyRequest)
@@ -183,11 +186,7 @@ public class CompanyRequestService {
     }
 
     private void validateUser(Long currentUserId) {
-        if(currentUserId == null || currentUserId <= 0){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid User ID!");
-        }
-
-        UserDTO userDTO = userServiceClient.getUserById(currentUserId);
+        UserDTO userDTO = userServiceClient.findUserById(currentUserId);
         if (userDTO == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found!");
         }
@@ -203,7 +202,7 @@ public class CompanyRequestService {
                         )
                 );
 
-        UserDTO userDTO = userServiceClient.getUserById(currentUserId);
+        UserDTO userDTO = userServiceClient.findUserById(currentUserId);
         if(userDTO == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found!");
         }
@@ -216,11 +215,7 @@ public class CompanyRequestService {
     }
 
     private void validateIfUserIsAdmin(Long userId) {
-        if(userId == null || userId <= 0L) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid UserID");
-        }
-
-        UserDTO userDTO = userServiceClient.getUserById(userId);
+        UserDTO userDTO = userServiceClient.findUserById(userId);
         if (userDTO == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found!");
         }
@@ -271,5 +266,15 @@ public class CompanyRequestService {
         }
 
         companyRequestRepository.delete(companyRequest);
+    }
+
+    public List<CompanyRequestDTO> findPendingCompanyRequests(Long currentUserId) {
+        validateIfUserIsAdmin(currentUserId);
+
+        return companyRequestRepository
+                .findCompanyRequestsByStatus(CompanyRequestStatus.PENDING)
+                .stream()
+                .map(companyRequestMapper::companyRequestToCompanyRequestDTO)
+                .collect(Collectors.toList());
     }
 }

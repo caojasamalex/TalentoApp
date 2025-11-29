@@ -5,9 +5,11 @@ import com.djokic.companyrequestservice.dto.CreateCompanyRequestDTO;
 import com.djokic.companyrequestservice.dto.EditCompanyRequestDTO;
 import com.djokic.companyrequestservice.service.CompanyRequestService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,22 +17,36 @@ import java.util.List;
 @RestController
 @RequestMapping("/company-requests")
 @RequiredArgsConstructor
+@Validated
 public class CompanyRequestController {
     private final CompanyRequestService companyRequestService;
 
     @GetMapping
-    public ResponseEntity<?> findAllCompanyRequests(@RequestHeader("X-User-Id") Long currentUserId) {
-        List<CompanyRequestDTO> companyRequestDTO = companyRequestService.findAllCompanyRequests(currentUserId);
+    public ResponseEntity<?> findAllCompanyRequests(
+            @Positive(message = "Invalid CurrentUserID!") @RequestHeader("X-User-Id") Long currentUserId
+    ) {
+        List<CompanyRequestDTO> companyRequestDTOS = companyRequestService.findAllCompanyRequests(currentUserId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(companyRequestDTO);
+                .body(companyRequestDTOS);
+    }
+
+    @GetMapping("/pending")
+    public ResponseEntity<?> findPendingCompanyRequests(
+            @Positive(message = "Invalid CurrentUserID!") @RequestHeader("X-User-Id") Long currentUserId
+    ) {
+        List<CompanyRequestDTO> companyRequestDTOS = companyRequestService.findPendingCompanyRequests(currentUserId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(companyRequestDTOS);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> findCompanyRequestById(
-            @RequestHeader("X-User-Id") Long currentUserId,
-            @PathVariable("id") Long companyRequestId
+            @Positive(message = "Invalid CurrentUserID!") @RequestHeader("X-User-Id") Long currentUserId,
+            @Positive(message = "Invalid CompanyRequestID!") @PathVariable("id") Long companyRequestId
     ) {
         CompanyRequestDTO companyRequestDTO = companyRequestService.findCompanyRequestById(currentUserId, companyRequestId);
 
@@ -41,7 +57,7 @@ public class CompanyRequestController {
 
     @PostMapping
     public ResponseEntity<?> createCompanyRequest(
-            @RequestHeader("X-User-Id") Long currentUserId,
+            @Positive(message = "Invalid CurrentUserID!") @RequestHeader("X-User-Id") Long currentUserId,
             @Valid @RequestBody CreateCompanyRequestDTO createCompanyRequestDTO
     ) {
         CompanyRequestDTO companyRequestDTO = companyRequestService.createCompanyRequest(currentUserId, createCompanyRequestDTO);
@@ -53,8 +69,8 @@ public class CompanyRequestController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateCompanyRequest(
-            @RequestHeader("X-User-Id") Long currentUserId,
-            @PathVariable("id") Long companyRequestId,
+            @Positive(message = "Invalid CurrentUserID!") @RequestHeader("X-User-Id") Long currentUserId,
+            @Positive(message = "Invalid CompanyRequestID!") @PathVariable("id") Long companyRequestId,
             @RequestBody EditCompanyRequestDTO editCompanyRequestDTO
     ) {
         CompanyRequestDTO companyRequestDTO = companyRequestService.editCompanyRequest(
@@ -70,8 +86,8 @@ public class CompanyRequestController {
 
     @PatchMapping("/{id}/approve")
     public ResponseEntity<?> approveCompanyRequest(
-            @RequestHeader("X-User-Id") Long currentUserId,
-            @PathVariable("id") Long companyRequestId
+            @Positive(message = "Invalid CurrentUserID!") @RequestHeader("X-User-Id") Long currentUserId,
+            @Positive(message = "Invalid CompanyRequestID!") @PathVariable("id") Long companyRequestId
     ) {
         CompanyRequestDTO companyRequestDTO = companyRequestService.approveCompanyRequest(
                 currentUserId,
@@ -85,8 +101,8 @@ public class CompanyRequestController {
 
     @PatchMapping("/{id}/reject")
     public ResponseEntity<?> rejectCompanyRequest(
-            @RequestHeader("X-User-Id") Long currentUserId,
-            @PathVariable("id") Long companyRequestId
+            @Positive(message = "Invalid CurrentUserID!") @RequestHeader("X-User-Id") Long currentUserId,
+            @Positive(message = "Invalid CompanyRequestID!") @PathVariable("id") Long companyRequestId
     ) {
         CompanyRequestDTO companyRequestDTO = companyRequestService.rejectCompanyRequest(
                 currentUserId,
@@ -100,8 +116,8 @@ public class CompanyRequestController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCompanyRequest(
-            @RequestHeader("X-User-Id") Long currentUserId,
-            @PathVariable("id") Long companyRequestId
+            @Positive(message = "Invalid CurrentUserID!") @RequestHeader("X-User-Id") Long currentUserId,
+            @Positive(message = "Invalid CompanyRequestID!") @PathVariable("id") Long companyRequestId
     ) {
         companyRequestService.deleteCompanyRequest(currentUserId, companyRequestId);
         return ResponseEntity.noContent().build();

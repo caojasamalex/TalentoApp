@@ -18,6 +18,5 @@ public class CreateCompanyRequestDTO {
     @NotBlank(message = "CompanyCity is required!")
     private String companyCity;
 
-    @NotBlank(message = "CompanyWebsite is required!")
     private String companyWebsite;
 }

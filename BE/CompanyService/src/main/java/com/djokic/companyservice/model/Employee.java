@@ -22,7 +22,7 @@ public class Employee {
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
-    @Column()
+    @Column(name = "company_role", nullable = false)
     @Enumerated(EnumType.STRING)
-    private EmployeeRole role;
+    private EmployeeRole companyRole;
 }
