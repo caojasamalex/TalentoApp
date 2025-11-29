@@ -3,10 +3,11 @@ package com.djokic.userservice.dto;
 import com.djokic.userservice.enumeration.PlatformRole;
 import lombok.*;
 
-@Getter
-@Setter
+import java.time.LocalDateTime;
+
 @AllArgsConstructor
 @NoArgsConstructor
+@Data
 @Builder
 public class UserDTO {
     private Long id;
@@ -14,4 +15,5 @@ public class UserDTO {
     private String firstName;
     private String lastName;
     private PlatformRole platformRole;
+    private LocalDateTime createdAt;
 }

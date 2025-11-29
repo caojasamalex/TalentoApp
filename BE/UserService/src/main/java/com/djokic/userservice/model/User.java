@@ -4,6 +4,8 @@ import com.djokic.userservice.enumeration.PlatformRole;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "users")
 @Data
@@ -35,4 +37,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name = "platform_role", nullable = false)
     private PlatformRole platformRole;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 }

@@ -1,13 +1,14 @@
 package com.djokic.userservice.dto;
 
 import com.djokic.userservice.enumeration.PlatformRole;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 @AllArgsConstructor
-@Getter
-@Setter
+@NoArgsConstructor
+@Data
+@Builder
 public class ChangeRoleRequestDTO {
-    PlatformRole role;
+    @NotNull(message = "PlatformRole is required!")
+    private PlatformRole role;
 }

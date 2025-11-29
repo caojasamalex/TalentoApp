@@ -19,6 +19,7 @@ public class UserMapperImpl implements UserMapper {
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .platformRole(user.getPlatformRole())
+                .createdAt(user.getCreatedAt())
                 .build();
     }
 
@@ -31,6 +32,7 @@ public class UserMapperImpl implements UserMapper {
                 .firstName(userDTO.getFirstName())
                 .lastName(userDTO.getLastName())
                 .platformRole(userDTO.getPlatformRole())
+                .createdAt(userDTO.getCreatedAt())
                 .build();
     }
 
