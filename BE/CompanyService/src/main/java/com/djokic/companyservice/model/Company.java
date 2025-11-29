@@ -1,27 +1,28 @@
-package com.djokic.companyrequestservice.model;
+package com.djokic.companyservice.model;
 
-import com.djokic.companyrequestservice.enumeration.CompanyRequestStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Table(name = "company_requests")
+@Table(name = "companies")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CompanyRequest {
+public class Company {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "requested_by_user_id", nullable = false)
-    private Long requestedByUserId;
-
     @Column(name = "company_name", nullable = false)
     private String companyName;
+
+    @Column(name = "company_photo_url")
+    private String companyPhotoUrl;
 
     @Column(name = "company_address", nullable = false)
     private String companyAddress;
@@ -32,13 +33,19 @@ public class CompanyRequest {
     @Column(name = "company_website")
     private String companyWebsite;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private CompanyRequestStatus status;
+    @Column(name = "company_description")
+    private String companyDescription;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @OneToMany(
+            mappedBy = "company",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Employee> employees = new ArrayList<>();
 }

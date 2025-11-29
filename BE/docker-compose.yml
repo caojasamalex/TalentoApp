@@ -52,5 +52,22 @@ services:
       USER_SERVICE_URL: ${USER_SERVICE_URL}
       COMPANY_SERVICE_URL: ${COMPANY_SERVICE_URL}
 
+  companyservice:
+    build:
+      context: ./CompanyService
+      dockerfile: Dockerfile
+    container_name: companyservice-talentoapp
+    restart: unless-stopped
+    ports:
+      - "8050:8050"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: ${CR_SVC_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      USER_SERVICE_URL: ${USER_SERVICE_URL}
+      COMPANY_REQUEST_SERVICE_URL: ${COMPANY_REQUEST_SERVICE_URL}
 volumes:
   pgdata:
