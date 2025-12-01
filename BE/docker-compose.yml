@@ -69,5 +69,23 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       USER_SERVICE_URL: ${USER_SERVICE_URL}
       COMPANY_REQUEST_SERVICE_URL: ${COMPANY_REQUEST_SERVICE_URL}
+
+  jobpostservice:
+    build:
+      context: ./JobPostService
+      dockerfile: Dockerfile
+    container_name: jobpostservice-talentoapp
+    restart: unless-stopped
+    ports:
+      - "8040:8040"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: ${CR_SVC_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      COMPANY_SERVICE_URL: ${COMPANY_SERVICE_URL}
+
 volumes:
   pgdata:

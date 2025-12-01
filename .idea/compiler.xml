@@ -25,7 +25,7 @@
         </processorPath>
         <module name="CompanyRequestService" />
       </profile>
-      <profile name="Annotation profile for CompanyService" enabled="true">
+      <profile name="Annotation profile for JobPostService" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -35,11 +35,15 @@
         <module name="CompanyService" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="JobPostService" target="17" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="CompanyRequestService" options="-parameters" />
       <module name="CompanyService" options="-parameters" />
+      <module name="JobPostService" options="-parameters" />
       <module name="UserService" options="-parameters" />
     </option>
   </component>

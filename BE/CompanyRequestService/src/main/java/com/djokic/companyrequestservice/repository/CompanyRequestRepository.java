@@ -10,5 +10,8 @@ import java.util.Optional;
 
 @Repository
 public interface CompanyRequestRepository extends JpaRepository<CompanyRequest, Long> {
+
+    List<CompanyRequest> findCompanyRequestByCompanyNameContains(String companyName);
+    List<CompanyRequest> findCompanyRequestByRequestedByUserId(Long requestedByUserId);
     List<CompanyRequest> findCompanyRequestsByStatus(CompanyRequestStatus status);
 }

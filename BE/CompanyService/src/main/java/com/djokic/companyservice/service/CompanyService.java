@@ -14,6 +14,7 @@ import com.djokic.companyservice.model.Company;
 import com.djokic.companyservice.repository.CompanyRepository;
 import com.djokic.companyservice.repository.EmployeeRepository;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -52,6 +53,20 @@ public class CompanyService {
                 );
 
         return companyDTO;
+    }
+
+    public List<CompanyDTO> findAllCompaniesByCompanyName(String companyName) {
+        if(companyName == null || companyName.isBlank()) {
+            return findAllCompanies();
+        }
+
+        String normalizedCompanyName = companyName.toLowerCase().trim();
+        List<Company> companies = companyRepository.findCompaniesByCompanyNameContainsIgnoreCase(normalizedCompanyName);
+
+        return companies
+                .stream()
+                .map(companyMapper::companyToCompanyDTO)
+                .collect(Collectors.toList());
     }
 
     @Transactional

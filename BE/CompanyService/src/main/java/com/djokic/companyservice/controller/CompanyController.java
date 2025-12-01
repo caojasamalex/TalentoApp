@@ -4,6 +4,7 @@ import com.djokic.companyservice.dto.CompanyDTO;
 import com.djokic.companyservice.dto.EditCompanyDTO;
 import com.djokic.companyservice.service.CompanyService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -38,6 +39,17 @@ public class CompanyController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(companyDTO);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<?> getAllCompaniesByCompanyName(
+            @RequestParam(name = "companyName", required = false) String companyName
+    ){
+        List<CompanyDTO> companyDTOS = companyService.findAllCompaniesByCompanyName(companyName);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(companyDTOS);
     }
 
     @PostMapping
