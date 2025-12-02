@@ -16,4 +16,5 @@ public class UserDTO {
     private String lastName;
     private PlatformRole platformRole;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
