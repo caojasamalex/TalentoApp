@@ -1,9 +1,18 @@
 package com.djokic.jobpostservice.mapper.impl;
 
+import com.djokic.jobpostservice.dto.CreateJobPostDTO;
 import com.djokic.jobpostservice.dto.JobPostDTO;
+import com.djokic.jobpostservice.enumeration.EmploymentTypeEnum;
+import com.djokic.jobpostservice.enumeration.LocationTypeEnum;
+import com.djokic.jobpostservice.enumeration.SeniorityLevelEnum;
 import com.djokic.jobpostservice.mapper.JobPostMapper;
 import com.djokic.jobpostservice.model.JobPost;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 
 @Component
 public class JobPostMapperImpl implements JobPostMapper {
@@ -48,6 +57,26 @@ public class JobPostMapperImpl implements JobPostMapper {
                 .salaryCurrency(jobPostDTO.getSalaryCurrency())
                 .createdAt(jobPostDTO.getCreatedAt())
                 .updatedAt(jobPostDTO.getUpdatedAt())
+                .build();
+    }
+
+    @Override
+    public JobPost createJobPostDTOToJobPost(CreateJobPostDTO createJobPostDTO) {
+        return JobPost
+                .builder()
+                .companyId(createJobPostDTO.getCompanyId())
+                .recruiterId(createJobPostDTO.getRecruiterId())
+                .title(createJobPostDTO.getTitle())
+                .description(createJobPostDTO.getDescription())
+                .employmentType(createJobPostDTO.getEmploymentType())
+                .seniorityLevel(createJobPostDTO.getSeniorityLevel())
+                .locationType(createJobPostDTO.getLocationType())
+                .location(createJobPostDTO.getLocation())
+                .salaryMin(createJobPostDTO.getSalaryMin())
+                .salaryMax(createJobPostDTO.getSalaryMax())
+                .salaryCurrency(createJobPostDTO.getSalaryCurrency())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
     }
 }
