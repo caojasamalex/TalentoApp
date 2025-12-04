@@ -1,11 +1,19 @@
 package com.djokic.jobpostservice.service;
 
+import com.djokic.jobpostservice.client.CompanyServiceClient;
+import com.djokic.jobpostservice.client.CompanyServiceInternalClient;
 import com.djokic.jobpostservice.dto.CreateJobPostDTO;
 import com.djokic.jobpostservice.dto.EditJobPostDTO;
 import com.djokic.jobpostservice.dto.JobPostDTO;
+import com.djokic.jobpostservice.dto.companyservicedto.CompanyDTO;
+import com.djokic.jobpostservice.enumeration.EmploymentTypeEnum;
+import com.djokic.jobpostservice.enumeration.LocationTypeEnum;
+import com.djokic.jobpostservice.enumeration.SeniorityLevelEnum;
 import com.djokic.jobpostservice.mapper.JobPostMapper;
 import com.djokic.jobpostservice.model.JobPost;
 import com.djokic.jobpostservice.repository.JobPostRepository;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -19,6 +27,8 @@ import java.util.stream.Collectors;
 public class JobPostService {
     private final JobPostRepository jobPostRepository;
     private final JobPostMapper jobPostMapper;
+    private final CompanyServiceClient companyServiceClient;
+    private final CompanyServiceInternalClient companyServiceInternalClient;
 
     public List<JobPostDTO> getAllJobPosts() {
         List<JobPost> jobPosts = jobPostRepository.findAll();
@@ -67,13 +77,6 @@ public class JobPostService {
     }
 
     public JobPostDTO createJobPost(CreateJobPostDTO createJobPostDTO){
-        if(createJobPostDTO == null){
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "CreateJobPostBody is required!"
-            );
-        }
-
         JobPost jobPost = jobPostMapper.createJobPostDTOToJobPost(createJobPostDTO);
 
         JobPost savedJobPost = jobPostRepository.save(jobPost);
@@ -81,10 +84,122 @@ public class JobPostService {
         return jobPostMapper.jobPostToJobPostDTO(savedJobPost);
     }
 
-    public JobPostDTO editJobPost(Long jobPostId, Long currentUserId,EditJobPostDTO editJobPostDTO){
+    public JobPostDTO editJobPost(Long jobPostId, Long currentUserId, EditJobPostDTO editJobPostDTO){
         //TODO: Check if the user is TALENT_ACQUISTION_MANAGER, CHECK IF THE JOBPOST EXISTS AND THEN, IF IT DOES
         // MAKE CHANGES TO THE JOBPOST.
 
-        return null;
+        JobPost jobPost = jobPostRepository.findById(jobPostId).orElseThrow(
+                () -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "JobPost with id " + jobPostId + " not found!"
+                )
+        );
+
+        Boolean canManageJobPost = companyServiceInternalClient.canManageJobPosts(jobPost.getCompanyId(), currentUserId);
+        if(!canManageJobPost){
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Not Authorized!"
+            );
+        }
+
+        boolean hasChanged = false;
+
+        if(editJobPostDTO.getTitle() != null
+                && !editJobPostDTO.getTitle().isBlank()
+                    && !editJobPostDTO.getTitle().trim().equals(jobPost.getTitle())){
+            String normalizedTitle = editJobPostDTO.getTitle().trim();
+            jobPost.setTitle(normalizedTitle);
+            hasChanged = true;
+        }
+
+        if(editJobPostDTO.getDescription() != null
+                && !editJobPostDTO.getDescription().isBlank()
+                    && !editJobPostDTO.getDescription().trim().equals(jobPost.getDescription())){
+            String normalizedDescription = editJobPostDTO.getDescription().trim();
+            jobPost.setDescription(normalizedDescription);
+            hasChanged = true;
+        }
+
+        if(editJobPostDTO.getEmploymentType() != null
+                && editJobPostDTO.getEmploymentType() != jobPost.getEmploymentType()){
+            jobPost.setEmploymentType(editJobPostDTO.getEmploymentType());
+            hasChanged = true;
+        }
+
+        if(editJobPostDTO.getSeniorityLevel() != null
+                && editJobPostDTO.getSeniorityLevel() != jobPost.getSeniorityLevel()){
+            jobPost.setSeniorityLevel(editJobPostDTO.getSeniorityLevel());
+            hasChanged = true;
+        }
+
+        if(editJobPostDTO.getLocationType() != null
+                && editJobPostDTO.getLocationType() != jobPost.getLocationType()){
+            jobPost.setLocationType(editJobPostDTO.getLocationType());
+            hasChanged = true;
+        }
+
+        if(editJobPostDTO.getLocation() != null
+                && !editJobPostDTO.getLocation().isBlank()
+                    && !editJobPostDTO.getLocation().trim().equals(jobPost.getLocation())){
+            String normalizedLocation = editJobPostDTO.getLocation().trim();
+            jobPost.setLocation(normalizedLocation);
+            hasChanged = true;
+        }
+
+        if(editJobPostDTO.getSalaryMax() != null
+                && !editJobPostDTO.getSalaryMax().equals(jobPost.getSalaryMax())){
+            jobPost.setSalaryMax(editJobPostDTO.getSalaryMax());
+            hasChanged = true;
+        }
+
+        if(editJobPostDTO.getSalaryMin() != null
+                && !editJobPostDTO.getSalaryMin().equals(jobPost.getSalaryMin())){
+            jobPost.setSalaryMin(editJobPostDTO.getSalaryMin());
+            hasChanged = true;
+        }
+
+        if(editJobPostDTO.getSalaryCurrency() != null
+                && !editJobPostDTO.getSalaryCurrency().isBlank()
+                && !editJobPostDTO.getSalaryCurrency().trim().equals(jobPost.getSalaryCurrency())){
+            jobPost.setSalaryCurrency(editJobPostDTO.getSalaryCurrency());
+            hasChanged = true;
+        }
+
+        if(hasChanged){
+            return jobPostMapper.jobPostToJobPostDTO(jobPostRepository.save(jobPost));
+        }
+
+        return jobPostMapper.jobPostToJobPostDTO(jobPost);
+    }
+
+    public List<JobPostDTO> search(Long companyId, String title) {
+        if(companyId != null && companyId <= 0L){
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid CompanyID!"
+            );
+        }
+
+        if(companyId == null && (title == null || title.isBlank())){
+            return getAllJobPosts();
+        }
+
+        if(companyId == null){
+            return getJobPostByTitle(title);
+        }
+
+        if(title == null || title.isBlank()){
+            return getJobPostsByCompanyId(companyId);
+        }
+
+        String normalizedTitle = title.trim();
+
+        List<JobPost> jobPosts = jobPostRepository.findJobPostsByCompanyIdAndTitleContainsIgnoreCase(companyId, normalizedTitle);
+
+        return jobPosts
+                .stream()
+                .map(jobPostMapper::jobPostToJobPostDTO)
+                .collect(Collectors.toList());
     }
 }

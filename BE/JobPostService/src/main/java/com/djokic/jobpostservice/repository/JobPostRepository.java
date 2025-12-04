@@ -13,4 +13,6 @@ public interface JobPostRepository extends JpaRepository<JobPost, Long> {
     List<JobPost> findJobPostsByTitleContainsIgnoreCase(String title);
     List<JobPost> findJobPostsByCompanyIdAndStatus(Long companyId, JobPostStatusEnum status);
     List<JobPost> findJobPostsByCompanyId(Long companyId);
+
+    List<JobPost> findJobPostsByCompanyIdAndTitleContainsIgnoreCase(Long companyId, String title);
 }

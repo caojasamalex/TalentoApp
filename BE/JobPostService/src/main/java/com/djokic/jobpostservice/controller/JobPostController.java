@@ -21,22 +21,13 @@ import java.util.List;
 public class JobPostController {
     private final JobPostService jobPostService;
 
+
     @GetMapping
-    public ResponseEntity<?> getAllJobPosts(){
-        List<JobPostDTO> jobPostDTOS = jobPostService.getAllJobPosts();
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(jobPostDTOS);
-    }
-
-    @GetMapping("/search")
-    public ResponseEntity<?> getJobPostsByTitle(@RequestParam String title){
-        List<JobPostDTO> jobPostDTOS = jobPostService.getJobPostByTitle(title);
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(jobPostDTOS);
+    public ResponseEntity<?> searchJobPosts(
+            @RequestParam(required = false) Long companyId,
+            @RequestParam(required = false) String title) {
+        List<JobPostDTO> jobPostDTOS = jobPostService.search(companyId, title);
+        return ResponseEntity.ok(jobPostDTOS);
     }
 
     @GetMapping("/{id}")
