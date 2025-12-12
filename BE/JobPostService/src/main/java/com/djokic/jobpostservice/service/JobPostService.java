@@ -7,6 +7,7 @@ import com.djokic.jobpostservice.dto.EditJobPostDTO;
 import com.djokic.jobpostservice.dto.JobPostDTO;
 import com.djokic.jobpostservice.dto.companyservicedto.CompanyDTO;
 import com.djokic.jobpostservice.enumeration.EmploymentTypeEnum;
+import com.djokic.jobpostservice.enumeration.JobPostStatusEnum;
 import com.djokic.jobpostservice.enumeration.LocationTypeEnum;
 import com.djokic.jobpostservice.enumeration.SeniorityLevelEnum;
 import com.djokic.jobpostservice.mapper.JobPostMapper;
@@ -202,4 +203,43 @@ public class JobPostService {
                 .map(jobPostMapper::jobPostToJobPostDTO)
                 .collect(Collectors.toList());
     }
+
+    public JobPostDTO publishJobPost(Long jobPostId, Long currentUserId) {
+        return changeJobPostStatus(jobPostId, currentUserId, JobPostStatusEnum.ACTIVE);
+    }
+
+    public JobPostDTO draftJobPost(Long jobPostId, Long currentUserId) {
+        return changeJobPostStatus(jobPostId, currentUserId, JobPostStatusEnum.DRAFT);
+    }
+
+    public JobPostDTO archiveJobPost(Long jobPostId, Long currentUserId) {
+        return changeJobPostStatus(jobPostId, currentUserId, JobPostStatusEnum.ARCHIVED);
+    }
+
+    public JobPostDTO closeJobPost(Long jobPostId, Long currentUserId) {
+        return changeJobPostStatus(jobPostId, currentUserId, JobPostStatusEnum.CLOSED);
+    }
+
+    private JobPostDTO changeJobPostStatus(Long jobPostId, Long currentUserId, JobPostStatusEnum status) {
+        Boolean canManageJobPosts = companyServiceInternalClient.canManageJobPosts(jobPostId, currentUserId);
+        if(!canManageJobPosts){
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Access denied!"
+            );
+        }
+
+        JobPost jobPost = jobPostRepository.findById(jobPostId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Job Post Not Found")
+        );
+
+        if(jobPost.getStatus().equals(JobPostStatusEnum.CLOSED)){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Job Post has been closed!");
+        }
+
+        jobPost.setStatus(status);
+
+        return jobPostMapper.jobPostToJobPostDTO(jobPostRepository.save(jobPost));
+    }
+
 }

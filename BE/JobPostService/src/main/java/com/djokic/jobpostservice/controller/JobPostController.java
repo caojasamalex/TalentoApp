@@ -39,6 +39,54 @@ public class JobPostController {
                 .body(jobPostDTO);
     }
 
+    @PatchMapping("/{id}/publish")
+    public ResponseEntity<?> publishJobPost(
+            @Positive(message = "Invalid currentUserId!") @RequestHeader("X-User-Id") Long currentUserId,
+            @Positive(message = "Invalid JobPostID!") @PathVariable("id") Long jobPostId
+    ){
+        JobPostDTO jobPostDTO = jobPostService.publishJobPost(jobPostId, currentUserId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(jobPostDTO);
+    }
+
+    @PatchMapping("/{id}/draft")
+    public ResponseEntity<?> draftJobPost(
+            @Positive(message = "Invalid currentUserId!") @RequestHeader("X-User-Id") Long currentUserId,
+            @Positive(message = "Invalid JobPostID!") @PathVariable("id") Long jobPostId
+    ){
+        JobPostDTO jobPostDTO = jobPostService.draftJobPost(jobPostId, currentUserId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(jobPostDTO);
+    }
+
+    @PatchMapping("/{id}/archive")
+    public ResponseEntity<?> archiveJobPost(
+            @Positive(message = "Invalid currentUserId!") @RequestHeader("X-User-Id") Long currentUserId,
+            @Positive(message = "Invalid JobPostID!") @PathVariable("id") Long jobPostId
+    ){
+        JobPostDTO jobPostDTO = jobPostService.archiveJobPost(jobPostId, currentUserId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(jobPostDTO);
+    }
+
+    @PatchMapping("/{id}/close")
+    public ResponseEntity<?> closeJobPost(
+            @Positive(message = "Invalid currentUserId!") @RequestHeader("X-User-Id") Long currentUserId,
+            @Positive(message = "Invalid JobPostID!") @PathVariable("id") Long jobPostId
+    ){
+        JobPostDTO jobPostDTO = jobPostService.closeJobPost(jobPostId, currentUserId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(jobPostDTO);
+    }
+
     @PostMapping
     public ResponseEntity<?> createJobPost(@Valid @RequestBody CreateJobPostDTO createJobPostDTO){
         JobPostDTO jobPostDTO = jobPostService.createJobPost(createJobPostDTO);
