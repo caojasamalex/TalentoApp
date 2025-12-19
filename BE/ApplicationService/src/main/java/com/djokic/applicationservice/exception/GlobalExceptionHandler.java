@@ -1,4 +1,4 @@
-package com.djokic.userservice.exception;
+package com.djokic.applicationservice.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;

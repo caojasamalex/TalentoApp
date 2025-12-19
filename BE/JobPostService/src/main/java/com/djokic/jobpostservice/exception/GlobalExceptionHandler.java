@@ -76,7 +76,9 @@ public class GlobalExceptionHandler {
                 .builder()
                 .status(httpStatus.value())
                 .error(httpStatus.getReasonPhrase())
-                .message(exception.getReason())
+                .message( exception.getReason() != null
+                        ? exception.getReason()
+                        : httpStatus.getReasonPhrase())
                 .path(request.getRequestURI())
                 .build();
 
