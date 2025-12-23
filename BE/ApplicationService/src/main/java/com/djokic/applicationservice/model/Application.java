@@ -55,4 +55,7 @@ public class Application {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "retracted", nullable = false)
+    private boolean retracted = false;
 }

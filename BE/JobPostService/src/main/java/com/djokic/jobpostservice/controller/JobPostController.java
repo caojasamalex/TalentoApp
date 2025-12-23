@@ -39,6 +39,16 @@ public class JobPostController {
                 .body(jobPostDTO);
     }
 
+    @GetMapping("/{id}/applications")
+    public ResponseEntity<?> getApplicationsByJobPost(
+            @PathVariable("id") @Positive(message = "Invalid JobPostID!") Long jobPostId,
+            @RequestHeader("X-User-Id") @Positive(message = "Invalid currentUserId!") Long currentUserId
+    ){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(jobPostService.getApplicationsByJobPost(jobPostId, currentUserId));
+    }
+
     @PatchMapping("/{id}/publish")
     public ResponseEntity<?> publishJobPost(
             @Positive(message = "Invalid currentUserId!") @RequestHeader("X-User-Id") Long currentUserId,
@@ -106,5 +116,15 @@ public class JobPostController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(jobPostDTO);
+    }
+
+    @GetMapping("/internal/can-manage")
+    public ResponseEntity<Boolean> canManageJobPost(
+            @RequestParam("jobPostId") @Positive Long jobPostId,
+            @RequestHeader("X-User-Id") @Positive Long currentUserId
+    ){
+        return ResponseEntity.ok(
+                jobPostService.canManageJobPost(jobPostId, currentUserId)
+        );
     }
 }

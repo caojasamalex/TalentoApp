@@ -1,4 +1,4 @@
-package com.djokic.jobpostservice;
+package com.djokic.analisysservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -6,10 +6,10 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
 @EnableFeignClients
-public class JobPostServiceApplication {
+public class AnalisysServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(JobPostServiceApplication.class, args);
+        SpringApplication.run(AnalisysServiceApplication.class, args);
     }
 
 }

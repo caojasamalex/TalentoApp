@@ -1,20 +1,16 @@
 package com.djokic.jobpostservice.service;
 
+import com.djokic.jobpostservice.client.ApplicationServiceClient;
 import com.djokic.jobpostservice.client.CompanyServiceClient;
 import com.djokic.jobpostservice.client.CompanyServiceInternalClient;
 import com.djokic.jobpostservice.dto.CreateJobPostDTO;
 import com.djokic.jobpostservice.dto.EditJobPostDTO;
 import com.djokic.jobpostservice.dto.JobPostDTO;
-import com.djokic.jobpostservice.dto.companyservicedto.CompanyDTO;
-import com.djokic.jobpostservice.enumeration.EmploymentTypeEnum;
+import com.djokic.jobpostservice.dto.applicationservice.ApplicationDTO;
 import com.djokic.jobpostservice.enumeration.JobPostStatusEnum;
-import com.djokic.jobpostservice.enumeration.LocationTypeEnum;
-import com.djokic.jobpostservice.enumeration.SeniorityLevelEnum;
 import com.djokic.jobpostservice.mapper.JobPostMapper;
 import com.djokic.jobpostservice.model.JobPost;
 import com.djokic.jobpostservice.repository.JobPostRepository;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -28,6 +24,7 @@ import java.util.stream.Collectors;
 public class JobPostService {
     private final JobPostRepository jobPostRepository;
     private final JobPostMapper jobPostMapper;
+    private final ApplicationServiceClient applicationServiceClient;
     private final CompanyServiceClient companyServiceClient;
     private final CompanyServiceInternalClient companyServiceInternalClient;
 
@@ -221,17 +218,17 @@ public class JobPostService {
     }
 
     private JobPostDTO changeJobPostStatus(Long jobPostId, Long currentUserId, JobPostStatusEnum status) {
-        Boolean canManageJobPosts = companyServiceInternalClient.canManageJobPosts(jobPostId, currentUserId);
+        JobPost jobPost = jobPostRepository.findById(jobPostId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Job Post Not Found")
+        );
+
+        Boolean canManageJobPosts = companyServiceInternalClient.canManageJobPosts(jobPost.getCompanyId(), currentUserId);
         if(!canManageJobPosts){
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN,
                     "Access denied!"
             );
         }
-
-        JobPost jobPost = jobPostRepository.findById(jobPostId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Job Post Not Found")
-        );
 
         if(jobPost.getStatus().equals(JobPostStatusEnum.CLOSED)){
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Job Post has been closed!");
@@ -242,4 +239,39 @@ public class JobPostService {
         return jobPostMapper.jobPostToJobPostDTO(jobPostRepository.save(jobPost));
     }
 
+    public List<ApplicationDTO> getApplicationsByJobPost(Long jobPostId, Long currentUserId) {
+        Long companyId = jobPostRepository
+                .findById(jobPostId)
+                .orElseThrow(
+                        () -> new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Invalid JobPostID!"
+                        )
+                )
+                .getCompanyId();
+
+        Boolean canManageJobPosts = companyServiceInternalClient.canManageJobPosts(companyId, currentUserId);
+        if(!canManageJobPosts){
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Access denied!"
+            );
+        }
+
+        return applicationServiceClient.getApplicationsByJobPost(jobPostId, currentUserId);
+    }
+
+    public boolean canManageJobPost(Long jobPostId, Long currentUserId) {
+        Long companyId = jobPostRepository
+                .findById(jobPostId)
+                .orElseThrow(
+                        () -> new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Invalid JobPostID!"
+                        )
+                )
+                .getCompanyId();
+
+        return companyServiceInternalClient.canManageJobPosts(companyId, currentUserId);
+    }
 }

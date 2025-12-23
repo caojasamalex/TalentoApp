@@ -22,6 +22,7 @@ public class ApplicationMapper {
                 .coverLetterText(application.getCoverLetterText())
                 .coverLetterFileUrl(application.getCoverLetterFileUrl())
                 .createdAt(application.getCreatedAt())
+                .retracted(application.isRetracted())
                 .build();
 
         return applicationDTO;
@@ -38,6 +39,7 @@ public class ApplicationMapper {
                 .coverLetterText(createApplicationDTO.getCoverLetterText())
                 .coverLetterFileUrl(createApplicationDTO.getCoverLetterFileUrl())
                 .createdAt(LocalDateTime.now())
+                .retracted(false)
                 .build();
 
         return application;
