@@ -10,7 +10,16 @@
         <option value="$PROJECT_DIR$/BE/JobPostService/pom.xml" />
         <option value="$PROJECT_DIR$/BE/ApplicationService/pom.xml" />
         <option value="$PROJECT_DIR$/BE/AnalisysService/pom.xml" />
+        <option value="$PROJECT_DIR$/BE/FileService/pom.xml" />
+        <option value="$PROJECT_DIR$/ApiAuthGatewayService/pom.xml" />
+        <option value="$PROJECT_DIR$/BE/ApiAuthGateway/pom.xml" />
+        <option value="$PROJECT_DIR$/BE/ApiAuthGatewayService/pom.xml" />
       </list>
+    </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/ApiAuthGatewayService/pom.xml" />
+      </set>
     </option>
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">

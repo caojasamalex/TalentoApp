@@ -3,11 +3,14 @@ package com.djokic.userservice.controller;
 import com.djokic.userservice.dto.ChangeRoleRequestDTO;
 import com.djokic.userservice.dto.RegisterRequestDTO;
 import com.djokic.userservice.dto.UserDTO;
+import com.djokic.userservice.enumeration.PlatformRole;
 import com.djokic.userservice.service.UserService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,10 +30,12 @@ public class AdminController {
 
     @PatchMapping("/user/{id}/role")
     public ResponseEntity<Object> changeUserRole(
-            @RequestHeader("X-User-Id") Long currentUserId,
             @PathVariable("id") Long userId,
             @Valid @RequestBody ChangeRoleRequestDTO changeRoleRequestDTO
     ) {
+        String currentUserIdStr = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long currentUserId = Long.valueOf(currentUserIdStr);
+
         UserDTO userDTO = userService.changeRole(currentUserId, userId, changeRoleRequestDTO);
 
         return ResponseEntity

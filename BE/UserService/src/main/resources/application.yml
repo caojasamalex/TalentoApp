@@ -1,6 +1,10 @@
 server:
   port: 8070
 
+internal:
+  auth:
+    allowed-skew-seconds: 300
+
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver

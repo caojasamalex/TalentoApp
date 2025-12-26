@@ -1,0 +1,47 @@
+server:
+  port: 8080
+
+internal:
+  auth:
+    allowed-skew-seconds: 300
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    com.djokic: DEBUG
+
+app:
+  frontend-url: http://localhost:3000
+
+services:
+  user-service:
+    url: ${USER_SERVICE_URL}
+
+  company-request-service:
+    url: ${COMPANY_REQUEST_SERVICE_URL}
+
+  company-service:
+    url: ${COMPANY_SERVICE_URL}
+
+  job-post-service:
+    url: ${JOB_POST_SERVICE_URL}
+
+  application-service:
+    url: ${APPLICATION_SERVICE_URL}
+
+  analysis-service-url:
+    url: ${ANALYSIS_SERVICE_URL}
+
+security:
+  jwt:
+    secret: ${JWT_SECRET}
+    issuer: talento-gateway
+    expiration-ms: 3600000
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret-key: ${JWT_SECRET}
+          issuer-uri: talento-gateway

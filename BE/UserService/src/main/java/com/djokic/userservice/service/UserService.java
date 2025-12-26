@@ -5,9 +5,9 @@ import com.djokic.userservice.model.User;
 import com.djokic.userservice.enumeration.PlatformRole;
 import com.djokic.userservice.mapper.UserMapper;
 import com.djokic.userservice.repository.UserRepository;
-import com.djokic.userservice.util.HmacSHA256;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -20,17 +20,18 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final HmacSHA256 hmacSHA256;
+    private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
-
 
     public UserDTO login(LoginRequestDTO loginRequestDTO) {
         String normalizedEmail = normalizeEmail(loginRequestDTO.getEmail());
-        String hashedAndNormalizedPassword = hashAndNormalizePassword(loginRequestDTO.getPassword());
+        String normalizedPassword = loginRequestDTO.getPassword().trim();
 
-        User user = fetchUserByEmail(normalizedEmail);
+        User user = userRepository.findUserByEmail(normalizedEmail).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password!")
+        );
 
-        if(!user.getPassword().equals(hashedAndNormalizedPassword)) {
+        if(!passwordMatches(normalizedPassword, user.getPassword())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password!");
         }
 
@@ -90,7 +91,6 @@ public class UserService {
     public UserDTO changeRole(Long currentUserId, Long userId, ChangeRoleRequestDTO changeRoleRequestDTO) {
         validateUserId(currentUserId);
         validateUserId(userId);
-        validateAdminRole(currentUserId);
 
         if(currentUserId.equals(userId)) {
             throw new ResponseStatusException(
@@ -114,7 +114,7 @@ public class UserService {
         validateUserId(currentUserId);
         validateUserId(userId);
 
-        if(!currentUserId.equals(userId)) {
+        if (!currentUserId.equals(userId)) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN,
                     "You cannot change other users' information!"
@@ -124,12 +124,12 @@ public class UserService {
         User user = fetchUserById(userId);
         boolean hasChanged = false;
 
-        if(userDTO.getEmail() != null && !userDTO.getEmail().isBlank()) {
+        if (userDTO.getEmail() != null && !userDTO.getEmail().isBlank()) {
             String email = normalizeEmail(userDTO.getEmail());
 
-            if(!user.getEmail().equals(email)) {
+            if (!user.getEmail().equals(email)) {
 
-                if(userRepository.existsByEmail(email)) {
+                if (userRepository.existsByEmail(email)) {
                     throw new ResponseStatusException(
                             HttpStatus.CONFLICT,
                             "Email already in use!"
@@ -141,11 +141,11 @@ public class UserService {
             }
         }
 
-        if(userDTO.getPassword() != null && !userDTO.getPassword().isBlank()) {
-            String password = hashAndNormalizePassword(userDTO.getPassword());
+        if (userDTO.getPassword() != null && !userDTO.getPassword().isBlank()) {
+            String password = userDTO.getPassword().trim();
 
-            if(!user.getPassword().equals(password)) {
-                user.setPassword(password);
+            if (!passwordMatches(password, user.getPassword())) {
+                user.setPassword(hashAndNormalizePassword(password));
                 hasChanged = true;
             }
         }
@@ -179,8 +179,10 @@ public class UserService {
         return email.trim().toLowerCase();
     }
 
-    private String hashAndNormalizePassword(String password) {
-        return hmacSHA256.hashPassword(password.trim());
+    private String hashAndNormalizePassword(String password){ return passwordEncoder.encode(password.trim()); }
+
+    private boolean passwordMatches(String rawPassword, String hashedPassword) {
+        return passwordEncoder.matches(rawPassword.trim(), hashedPassword);
     }
 
     private String normalizeFirstName(String firstName) {
@@ -194,16 +196,6 @@ public class UserService {
     private void validateUserId(Long userId) {
         if(userId == null || userId <= 0){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid UserID!");
-        }
-    }
-
-    private void validateAdminRole(Long currentUserId) {
-        User user = fetchUserById(currentUserId);
-        if(user.getPlatformRole() != PlatformRole.PLATFORM_ADMIN) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "Only platform admin can perform this action!"
-            );
         }
     }
 

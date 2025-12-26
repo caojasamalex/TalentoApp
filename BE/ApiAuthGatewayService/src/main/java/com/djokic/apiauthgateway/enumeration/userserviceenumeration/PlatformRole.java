@@ -1,4 +1,4 @@
-package com.djokic.userservice.enumeration;
+package com.djokic.apiauthgateway.enumeration.userserviceenumeration;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

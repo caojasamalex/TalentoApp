@@ -17,6 +17,27 @@ services:
       timeout: 5s
       retries: 5
 
+  apiauthgatewayservice:
+    build:
+      context: ./ApiAuthGatewayService
+      dockerfile: Dockerfile
+    container_name: apiauthgatewayservice-talentoapp
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      AUTH_SHARED_SECRET: ${AUTH_SHARED_SECRET}
+      USER_SERVICE_URL: ${USER_SERVICE_URL}
+      COMPANY_REQUEST_SERVICE_URL: ${COMPANY_REQUEST_SERVICE_URL}
+      COMPANY_SERVICE_URL: ${COMPANY_SERVICE_URL}
+      JOB_POST_SERVICE_URL: ${JOB_POST_SERVICE_URL}
+      APPLICATION_SERVICE_URL: ${APPLICATION_SERVICE_URL}
+      ANALYSIS_SERVICE_URL: ${ANALYSIS_SERVICE_URL}
+
   userservice:
     build:
       context: ./UserService
@@ -29,10 +50,10 @@ services:
       db:
         condition: service_healthy
     environment:
+      AUTH_SHARED_SECRET: ${AUTH_SHARED_SECRET}
       SPRING_DATASOURCE_URL: ${USER_SVC_DATASOURCE_URL}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      HMACSHA256_KEY: ${HMACSHA256_KEY}
       COMPANY_REQUEST_SERVICE_URL: ${COMPANY_REQUEST_SERVICE_URL}
       COMPANY_SERVICE_URL: ${COMPANY_SERVICE_URL}
       JOB_POST_SERVICE_URL: ${JOB_POST_SERVICE_URL}
